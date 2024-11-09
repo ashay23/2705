@@ -1,0 +1,181 @@
+from pyspark import SparkContext, SparkConf
+conf = SparkConf()
+sc = SparkContext(conf=conf)
+.
+.
+.
+counts.saveAsTextFile("training/pyspark-py")
+sc.stop()
+
+
+SORT IN ASCENDING AND GET SMALLEST VALUE
+sortbyRDD=mapRDD.sortBy(lambda a:a[1]).first() 
+
+-------------------------------------------------------------
+find the highest revenue year wise
+-------------------------------------------------------------
+
+airlinesRDD = sc.textFile("training/airlines.csv",1)
+header = airlinesRDD.first()
+final_data = airlinesRDD.filter(lambda a : a != header)
+KVRdd = final_data.map(lambda a : (a.split(",")[0], (float(a.split(",")[2])*int(a.split(",")[3]))))
+YrWiseTotal = KVRdd.reduceByKey(lambda a,b : a + b)
+sortbyval = YrWiseTotal.sortBy(lambda a : -a[1])
+sortbyval.coalesce(1).saveAsTextFile("training/airlinesRev") 
+
+-------------------------------------------------------------
+find the highest revenue year+quarter wise
+-------------------------------------------------------------
+
+airlinesRDD = sc.textFile("training/airlines.csv",1)
+header = airlinesRDD.first()
+final_data = airlinesRDD.filter(lambda a : a != header)
+YrQtrRDD = final_data.map(lambda a : ((a.split(",")[0] + "," + a.split(",")[1]), (float(a.split(",")[2])*int(a.split(",")[3]))))
+sortbyYrQtr = YrQtrRDD.sortBy(lambda a : -a[1])
+sortbyYrQtr.coalesce(1).saveAsTextFile("training/airlinesRev") 
+
+-------------------------------------------------------------
+Assignment
+-------------------------------------------------------------
+How can you calculate the average revenue per seat for each year and quarter?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[2]))))
+mapRDD.coalesce(1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+What is the PySpark code to find the year and quarter with the highest average revenue per seat?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[2]))))
+sortbyRDD=mapRDD.sortBy(lambda a:-a[1]).first()
+sc.parallelize([sortbyRDD],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+How can you calculate the total number of booked seats for each year and quarter?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[3]))))
+mapRDD.coalesce(1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+What is the PySpark code to determine the year and quarter with the highest total number of booked seats?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[3]))))
+sortbyRDD=mapRDD.sortBy(lambda a:-a[1]).first()
+sc.parallelize([sortbyRDD],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+How can you calculate the total revenue generated for each year and quarter (revenue = average revenue per seat * total number of booked seats)?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[2])*int(a.split(',')[3]))))
+mapRDD.coalesce(1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+What is the PySpark code to identify the year and quarter with the highest total revenue?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a: ((a.split(',')[0]+','+a.split(',')[1]),(float(a.split(',')[2])*int(a.split(',')[3]))))
+sortbyRDD=mapRDD.sortBy(lambda a:-a[1]).first()
+sc.parallelize([sortbyRDD],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+How can you find the average revenue per seat across different years using PySpark?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(a.split(',')[0],float(a.split(',')[2])))
+reducebykeyRDD=mapRDD.reduceByKey(lambda a,b:a+b)
+reducebykeyRDD.coalesce(1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+What is the PySpark code to determine the year with the highest average revenue per seat?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(a.split(',')[0],float(a.split(',')[2])))
+reducebykeyRDD=mapRDD.reduceByKey(lambda a,b:a+b)
+sortbyRDD=reducebykeyRDD.sortBy(lambda a:-a[1]).first()
+sc.parallelize([sortbyRDD],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+How can you calculate the overall average revenue per seat for the entire dataset using PySpark?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(float(a.split(',')[2])))
+sum=0
+for i in mapRDD.collect():
+    sum+=i
+avg=sum/mapRDD.count()
+sc.parallelize([avg],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+
+#REPEATED
+What is the average revenue per seat for each year and quarter?
+Which year and quarter had the highest average revenue per seat?
+What is the total number of booked seats for each year and quarter?
+Which year and quarter had the highest total number of booked seats?
+What is the total revenue generated for each year and quarter?
+Which year and quarter had the highest total revenue?
+How does the average revenue per seat vary across different years?
+Which year had the highest average revenue per seat?
+What is the overall average revenue per seat for the entire dataset?
+How does the total number of booked seats vary across different years?
+Which year had the highest total number of booked seats?
+What is the overall total number of booked seats for the entire dataset?
+How does the total revenue generated vary across different years?
+Which year had the highest total revenue generated?
+What is the overall total revenue for the entire dataset?
+
+-------------------------------------------------------------
+How does the total number of booked seats vary across different years?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(a.split(',')[0],float(a.split(',')[3])))
+reducebykeyRDD=mapRDD.reduceByKey(lambda a,b:a+b)
+reducebykeyRDD.coalesce(1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+Which year had the highest total number of booked seats?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(a.split(',')[0],float(a.split(',')[3])))
+reducebykeyRDD=mapRDD.reduceByKey(lambda a,b:a+b)
+sortbyRDD=reducebykeyRDD.sortBy(lambda a:-a[1]).first()
+sc.parallelize([sortbyRDD],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+What is the overall total number of booked seats for the entire dataset?
+
+dataRDD=sc.textFile("training/airlines.csv")
+header=dataRDD.first()
+dataRDD1=dataRDD.filter(lambda a:a!=header)
+mapRDD=dataRDD1.map(lambda a:(float(a.split(',')[3])))
+sum=0
+for i in mapRDD.collect():
+    sum+=i
+sc.parallelize([sum],1).saveAsTextFile("training/output")
+-------------------------------------------------------------
+
+#DOUBT
+How does the average revenue per seat vary across different quarters within a year?
+How does the total number of booked seats vary across different quarters within a year?
+How does the total revenue vary across different quarters within a year?
+(just solve for each year+quarter)
+
+Can you identify any trends or patterns in the revenue or number of booked seats over the years?
+Can you identify any seasonal trends in the average revenue per seat?
+Can you identify any seasonal trends in the total number of booked seats?
+(just solve for each year)
