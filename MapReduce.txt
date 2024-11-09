@@ -1,0 +1,98 @@
+public class DailyPriceChange {
+
+    public static class MapClass extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+        public void map(LongWritable key, Text value, Context context) {
+            try {
+                String[] str = value.toString().split(",");
+                String stockSymbol = str[1];
+                String date = str[2];
+                double openPrice = Double.parseDouble(str[3]);
+                double closePrice = Double.parseDouble(str[6]);
+                double priceChange = closePrice - openPrice;
+
+                context.write(new Text(stockSymbol+"-"+date), new DoubleWritable(priceChange));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public static class ReduceClass extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+        public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+            for (DoubleWritable val : values) {
+                context.write(key, val); // Write the key and the price change value
+            }
+        }
+    }
+    
+    
+public class MonthlyAverageClosingPrice {
+
+    public static class MapClass extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+        public void map(LongWritable key, Text value, Context context) {
+            try {
+                String[] str = value.toString().split(",");
+                String stockSymbol = str[1];
+                String date = str[2];
+                String month = date.substring(5, 7);  // Extract month from date
+                String year = date.substring(0, 4);  // Extract year from date
+                String monthYear = month + "-" + year;
+                double closingPrice = Double.parseDouble(str[6]);
+
+                context.write(new Text(stockSymbol + ": " + monthYear), new DoubleWritable(closingPrice));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public static class ReduceClass extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+        public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+            double sum = 0;
+            int count = 0;
+
+            for (DoubleWritable val : values) {
+                sum += val.get();
+                count++;
+            }
+
+            double average = sum / count;
+            context.write(key, new DoubleWritable(average));
+        }
+    }
+    
+public class YearlyAverageVolume {
+
+    public static class MapClass extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+        public void map(LongWritable key, Text value, Context context) {
+            try {
+                String[] str = value.toString().split(",");
+                String stockSymbol = str[1];
+                String date = str[2];
+                String year = date.substring(0, 4);
+                long volume = Long.parseLong(str[7]);
+
+                context.write(new Text(stockSymbol + "-" + year), new DoubleWritable(volume));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public static class ReduceClass extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+        public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
+            long sum = 0;
+            int count = 0;
+
+            for (DoubleWritable val : values) {
+                sum += val.get();
+                count++;
+            }
+
+            // Calculate the average trading volume
+            double averageVolume = (double) sum / count;
+
+            // Write the stock symbol and average trading volume for the year
+            context.write(key, new DoubleWritable(averageVolume));
+        }
+    }
